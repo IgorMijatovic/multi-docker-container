@@ -1,0 +1,39 @@
+{
+    "AWSEBDockerrunVersion": 2,
+    "containerDefinitions": [
+        {
+            "name": "client",
+            "image": "imijatovic/multi-client",
+            "hostname": "client",
+            "essential": false,
+            "memory": 128
+        }, 
+        {
+            "name": "server",
+            "image": "imijatovic/multi-server",
+            "hotstname": "api",
+            "essential": false,
+            "memory": 128
+        },
+        {
+            "name": "worker",
+            "image":"imijatovic/multi-worker",
+            "hostname": "worker",
+            "essential": false,
+            "memory": 128
+        },
+        {
+            "name": "nginx",
+            "image":"imijatovic/multi-nginx",
+            "essential": true,
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "containerPort": 80
+                }
+            ],
+            "memory": 128,
+            "links": ["client", "server"]
+        }
+    ]
+}

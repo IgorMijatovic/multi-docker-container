@@ -1,0 +1,36 @@
+sudo: required
+services:
+    - docker
+
+before_install:
+    - docker build -t imijatovic/docker-multi -f ./client/Dockerfile.dev ./client
+    
+script:
+    - docker run -e CI=true imijatovic/docker-multi npm run test
+
+after_success:
+    - docker build -t imijatovic/multi-client ./client    
+    - docker build -t imijatovic/multi-nginx ./nginx   
+    - docker build -t imijatovic/multi-server ./server    
+    - docker build -t imijatovic/multi-worker ./worker    
+
+# Log in to the docker CLI, for this set env variable in travis
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+# take those images and push them to docker hub
+    - docker push imijatovic/multi-client
+    - docker push imijatovic/multi-nginx
+    - docker push imijatovic/multi-server
+    - docker push imijatovic/multi-worker
+
+deploy:
+    edge: true
+    provider: elasticbeanstalk   
+    region: xy 
+    app: multi-docker
+    env: Multidocker-env
+    bucket_name: in s3 bucket where travis put zipped files
+    bucket_path: docker-multi
+    on:
+        branch: master
+    access_key_id: $AWS_ACCESS_KEY    this it set in travis env variables
+    secure_key_id:    blobk
